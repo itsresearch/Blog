@@ -5,22 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from blog_app.forms import PostForm
 
-from django.views.generic import ListView
-
 # Create your views here.
 
-
-class PostListView(ListView):
-    model = Post
-    template_name = "post_list.html"
-    context_object_name = "posts"
-
-    def get_queryset(self):
-        posts = Post.objects.filter(published_at_isnull = False).order_by(
-            "-published_at"
-        )
-        return posts
-    
 def post_list(request):
     posts = Post.objects.filter(published_at__isnull=False)
     return render(
