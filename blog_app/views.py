@@ -7,6 +7,8 @@ from blog_app.forms import PostForm
 
 from django.views.generic import ListView
 
+from django.views.generic import DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 
@@ -16,34 +18,29 @@ class PostListView(ListView):
     context_object_name = "posts"
 
     def get_queryset(self):
-        posts = Post.objects.filter(published_at_isnull = False).order_by(
+        posts = Post.objects.filter(published_at__isnull = False).order_by(
             "-published_at"
         )
         return posts
     
-def post_list(request):
-    posts = Post.objects.filter(published_at__isnull=False)
-    return render(
-        request,
-        "post_list.html",
-        {"posts": posts},
-    )
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "post_detail.html"
+    context_object_name = "post"
 
-def post_detail(request, pk):
-    post = Post.objects.get(pk=pk, published_at__isnull=False)
-    return render(
-        request,
-        "post_detail.html",
-        {"post": post},
-    )
-@login_required
-def draft_list(request):
-    posts = Post.objects.filter(published_at__isnull=True)
-    return render(  
-        request,
-        "draft_list.html",
-        {"posts": posts},
-    )
+    def get_queryset(self):
+        queryset = Post.objects.filter(pk = self.kwargs["pk"], published_at__isnull = False)
+        return queryset
+
+class DraftListView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = "draft_list.html"
+    context_object_name = "posts"
+
+    def get_queryset(self):
+        queryset = Post.objects.filter(published_at__isnull = True)
+        return queryset
+    
 @login_required
 def draft_detail(request,pk):
     post = Post.objects.get(pk=pk, published_at__isnull=True)
