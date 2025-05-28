@@ -41,10 +41,16 @@ class DraftListView(LoginRequiredMixin, ListView):
         queryset = Post.objects.filter(published_at__isnull = True)
         return queryset
     
-@login_required
-def draft_detail(request,pk):
-    post = Post.objects.get(pk=pk, published_at__isnull=True)
-    return render(request, "draft_detail.html",{"post":post},)
+
+class DraftDetailView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = "draft_detail.html"
+    context_object_name = "post"
+
+    def get_queryset(self):
+        queryset = Post.objects.filter(pk = self.kwargs["pk"], published_at__isnull = True)
+        return queryset
+    
 
 @login_required
 def draft_publish(request, pk):
